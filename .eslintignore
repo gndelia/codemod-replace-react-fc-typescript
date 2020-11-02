@@ -1,0 +1,3 @@
+./dist
+husky.config.js
+commitlint.config.js
