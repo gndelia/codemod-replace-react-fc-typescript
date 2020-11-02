@@ -66,6 +66,16 @@ export const MyComponentWithGenerics2 = (
 ) => <span>{text}</span>
 ```
 
+And even with no Props
+
+```tsx
+// before codemod runs
+const NoPropsComponent: React.FC = () => <span>foo</span>
+
+// after codemod runs
+const NoPropsComponent = () => <span>foo</span>
+```
+
 ## How to use
 
 1- Install jscodeshift

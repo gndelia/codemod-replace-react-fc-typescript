@@ -18,8 +18,12 @@ const isObjectPattern = (x: any): x is ObjectPattern => (x as ObjectPattern).typ
 export default (fileInfo: FileInfo, { j }: API) => {
   function addPropsTypeToComponentBody(n: ASTPath<VariableDeclarator>) {
     // extract the Prop's type text
-    const typeParameterParam = ((n.node.id as Identifier).typeAnnotation!.typeAnnotation as TSTypeReference)
-      .typeParameters!.params[0]
+    const reactFcOrSfcNode = (n.node.id as Identifier).typeAnnotation!.typeAnnotation as TSTypeReference
+    // shape of React.FC (no props)
+    if (!reactFcOrSfcNode.typeParameters) {
+      return
+    }
+    const typeParameterParam = reactFcOrSfcNode.typeParameters.params[0]
     let newTypeAnnotation: TSTypeAnnotation | undefined
 
     // form of React.FC<Props> or React.SFC<Props>
@@ -92,7 +96,8 @@ export default (fileInfo: FileInfo, { j }: API) => {
         return (
           typeName?.left?.name === 'React' &&
           ['FC', 'SFC'].includes(typeName?.right?.name) &&
-          ['TSQualifiedName', 'TSTypeParameterInstantiation'].includes(genericParamsType)
+          (['TSQualifiedName', 'TSTypeParameterInstantiation'].includes(genericParamsType) ||
+            !identifier?.typeAnnotation?.typeAnnotation?.typeParameters)
         )
       })
       .forEach((n) => {

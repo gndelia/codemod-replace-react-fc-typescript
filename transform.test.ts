@@ -129,6 +129,48 @@ const testCases: TestCase[] = [
     ) => <span>{text}</span>
     `,
   },
+  {
+    input: `
+    import React from 'react'
+
+    const NoPropsComponent: React.FC = () => <span>foo</span>
+    `,
+    output: `
+    import React from 'react'
+
+    const NoPropsComponent = () => <span>foo</span>
+    `,
+  },
+  {
+    input: `
+    import React from 'react'
+
+    type Props = { id: number, disabled: boolean }
+    const WithRestProps: React.FC<Props> = ({ id, ...restProps }) => <span>{id}</span>
+    `,
+    output: `
+    import React from 'react'
+
+    type Props = { id: number, disabled: boolean }
+    const WithRestProps = ({ id, ...restProps }: Props) => <span>{id}</span>
+    `,
+  },
+  {
+    input: `
+    import React from 'react'
+
+    type Props1 = { id: number }
+    type Props2 = { text?: string }
+    const MultipleProps: React.FC<Props1 & Props2> = ({ id, ...restProps }) => <span>foo</span>
+    `,
+    output: `
+    import React from 'react'
+
+    type Props1 = { id: number }
+    type Props2 = { text?: string }
+    const MultipleProps = ({ id, ...restProps }: Props1 & Props2) => <span>foo</span>
+    `,
+  },
 ]
 
 function escapeLineEndingsAndMultiWhiteSpaces(text: string | null | undefined) {
