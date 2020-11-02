@@ -74,8 +74,21 @@ export const MyComponentWithGenerics2 = (
 npm install -g jscodeshift
 ```
 
-2- TBD the command to run
+2- Run the following command
+
+```
+jscodeshift -t https://raw.githubusercontent.com/gndelia/codemod-replace-react-fc-typescript/main/dist/index.js --extensions=tsx --verbose=2 <FOLDER-YOU-WANT-TO-TRANSFORM>
+```
+
+There are other options you can read in the jscodeshift's Readme.
+
+`jscodeshift` only accepts local transform files, or remote self-contained files. That's why I compiled the transform file into one distributable file using [@vercel/ncc](https://github.com/vercel/ncc). If you don't want to run this remote file (because you might not trust, although you can read the source - it is totally safe), you can download this repo and run 
+
+```
+jscodeshift -t Path/To/Repo/transform.ts --extensions=tsx --verbose=2 <FOLDER-YOU-WANT-TO-TRANSFORM>
+```
 
 ## Notes
 
-The codemod focuses in replacing the nodes but does not do styling. You might want to run Prettier or your favorite formatting tool after the code has been modified.
+- The codemod focuses in replacing the nodes but does not do styling. You might want to run Prettier or your favorite formatting tool after the code has been modified.
+- If your component was using the implicit definition of `children` provided by `React.FC`, you will have to add the explicit definition or the code won't compile. The value that `React.FC` provides (that accepts anything you would accept in js as children) is `{ children?: ReactNode }`, but you can restrict it to what you only want to accept (for instance, just a string, a number, only one component, and so on)
