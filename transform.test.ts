@@ -152,7 +152,25 @@ const testCases: TestCase[] = [
     import React from 'react'
 
     type Props = { id: number, disabled: boolean }
-    const WithRestProps = ({ id, ...restProps }: Props) => <span>{id}</span>
+    const WithRestProps = ( { id, ...restProps }: Props ) => <span>{id}</span>
+    `,
+  },
+  {
+    input: `
+    import React from 'react'
+    import { RouterProps } from 'router-library'
+
+    type Props1 = { id: number }
+    type Props2 = { text?: string }
+    const MultipleProps: React.FC<Props1 & Props2 & RouterProps> = ({ id, ...restProps }) => <span>foo</span>
+    `,
+    output: `
+    import React from 'react'
+    import { RouterProps } from 'router-library'
+
+    type Props1 = { id: number }
+    type Props2 = { text?: string }
+    const MultipleProps = ( { id, ...restProps }: Props1 & Props2 & RouterProps ) => <span>foo</span>
     `,
   },
   {
@@ -160,15 +178,13 @@ const testCases: TestCase[] = [
     import React from 'react'
 
     type Props1 = { id: number }
-    type Props2 = { text?: string }
-    const MultipleProps: React.FC<Props1 & Props2> = ({ id, ...restProps }) => <span>foo</span>
+    const MultipleProps: React.FC<Props1 & { text?: string }> = ({ id, ...restProps }) => <span>foo</span>
     `,
     output: `
     import React from 'react'
 
     type Props1 = { id: number }
-    type Props2 = { text?: string }
-    const MultipleProps = ({ id, ...restProps }: Props1 & Props2) => <span>foo</span>
+    const MultipleProps = ( { id, ...restProps }: Props1 & { text?: string } ) => <span>foo</span>
     `,
   },
 ]

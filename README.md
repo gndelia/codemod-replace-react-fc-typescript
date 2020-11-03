@@ -66,7 +66,17 @@ export const MyComponentWithGenerics2 = (
 ) => <span>{text}</span>
 ```
 
-And even with no Props
+and with props defined with intersection
+
+```tsx
+// before codemod runs
+const WithIntersection: React.FC<Props1 & Props2> = ({ id, ...restProps }) => <span>{id}</span>
+
+// after codemod runs
+const WithIntersection = ( { id, ...restProps }: Props1 & Props2 ) => <span>{id}</span>
+```
+
+Even with no Props!
 
 ```tsx
 // before codemod runs

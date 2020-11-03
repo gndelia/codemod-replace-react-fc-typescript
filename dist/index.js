@@ -12,28 +12,43 @@ exports.parser = void 0;
 const isIdentifier = (x) => x.type === 'Identifier';
 const isTsTypeReference = (x) => x.type === 'TSTypeReference';
 const isObjectPattern = (x) => x.type === 'ObjectPattern';
+const isTsIntersectionType = (x) => x.type === 'TSIntersectionType';
 exports.default = (fileInfo, { j }) => {
+    // dynamically call the api method to build the proper node. For example TSPropertySignature becomes tsPropertySignature
+    function buildDynamicalNodeByType({ loc, ...rest }) {
+        const key = rest.type.slice(0, 2).toLowerCase() + rest.type.slice(2);
+        return j[key].from({ ...rest });
+    }
     function addPropsTypeToComponentBody(n) {
         // extract the Prop's type text
-        const typeParameterParam = n.node.id.typeAnnotation.typeAnnotation
-            .typeParameters.params[0];
-        let newTypeAnnotation;
+        const reactFcOrSfcNode = n.node.id.typeAnnotation.typeAnnotation;
+        // shape of React.FC (no props)
+        if (!reactFcOrSfcNode.typeParameters) {
+            return;
+        }
+        const typeParameterFirstParam = reactFcOrSfcNode.typeParameters.params[0];
+        let newInnerTypeAnnotation;
         // form of React.FC<Props> or React.SFC<Props>
-        if (isTsTypeReference(typeParameterParam)) {
-            const { loc, ...rest } = typeParameterParam;
-            newTypeAnnotation = j.tsTypeAnnotation.from({ typeAnnotation: j.tsTypeReference.from({ ...rest }) });
+        if (isTsTypeReference(typeParameterFirstParam)) {
+            const { loc, ...rest } = typeParameterFirstParam;
+            newInnerTypeAnnotation = j.tsTypeReference.from({ ...rest });
+        }
+        else if (isTsIntersectionType(typeParameterFirstParam)) {
+            // form of React.FC<Props & Props2>
+            const { loc, ...rest } = typeParameterFirstParam;
+            newInnerTypeAnnotation = j.tsIntersectionType.from({
+                ...rest,
+                types: rest.types.map((t) => buildDynamicalNodeByType(t)),
+            });
         }
         else {
             // form of React.FC<{ foo: number }> or React.SFC<{ foo: number }>
-            const inlineTypeDeclaration = typeParameterParam;
+            const inlineTypeDeclaration = typeParameterFirstParam;
             // remove locations to avoid messing up with commans
-            const newMembers = inlineTypeDeclaration.members.map(({ loc, ...rest }) => {
-                // dynamically call the api method to build the proper node. For example TSPropertySignature becomes tsPropertySignature
-                const key = rest.type.slice(0, 2).toLowerCase() + rest.type.slice(2);
-                return j[key].from({ ...rest });
-            });
-            newTypeAnnotation = j.tsTypeAnnotation.from({ typeAnnotation: j.tsTypeLiteral.from({ members: newMembers }) });
+            const newMembers = inlineTypeDeclaration.members.map((m) => buildDynamicalNodeByType(m));
+            newInnerTypeAnnotation = j.tsTypeLiteral.from({ members: newMembers });
         }
+        const outerNewTypeAnnotation = j.tsTypeAnnotation.from({ typeAnnotation: newInnerTypeAnnotation });
         // build the new nodes
         const arrowFunctionNode = n.node.init;
         const firstParam = arrowFunctionNode.params[0];
@@ -42,14 +57,26 @@ exports.default = (fileInfo, { j }) => {
         if (isIdentifier(firstParam)) {
             arrowFunctionFirstParameter = j.identifier.from({
                 ...firstParam,
-                typeAnnotation: newTypeAnnotation,
+                typeAnnotation: outerNewTypeAnnotation,
             });
         }
         // form of ({ foo }) =>
         if (isObjectPattern(firstParam)) {
+            const { properties, ...restParams } = firstParam;
             arrowFunctionFirstParameter = j.objectPattern.from({
-                ...firstParam,
-                typeAnnotation: newTypeAnnotation,
+                ...restParams,
+                // remove locations because properties might have a spread like ({ id, ...rest }) => and it breaks otherwise
+                properties: properties.map(({ loc, ...rest }) => {
+                    const key = rest.type.slice(0, 1).toLowerCase() + rest.type.slice(1);
+                    // This workaround is because the AST parsed has "RestElement, but codeshift (as well as the types) expects "RestProperty"
+                    // manually doing this works ok. restElement has the properties needed
+                    if (key === 'restElement') {
+                        const prop = rest;
+                        return j.restProperty.from({ argument: prop.argument });
+                    }
+                    return j[key].from({ ...rest });
+                }),
+                typeAnnotation: outerNewTypeAnnotation,
             });
         }
         const newVariableDeclarator = j.variableDeclarator.from({
@@ -83,7 +110,8 @@ exports.default = (fileInfo, { j }) => {
             // verify it is the shape of React.FC<Props> React.SFC<Props>, React.FC<{ type: string }>
             return (typeName?.left?.name === 'React' &&
                 ['FC', 'SFC'].includes(typeName?.right?.name) &&
-                ['TSQualifiedName', 'TSTypeParameterInstantiation'].includes(genericParamsType));
+                (['TSQualifiedName', 'TSTypeParameterInstantiation'].includes(genericParamsType) ||
+                    !identifier?.typeAnnotation?.typeAnnotation?.typeParameters));
         })
             .forEach((n) => {
             hasModifications = true;
