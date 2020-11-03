@@ -2,7 +2,11 @@
 
 A codemod using [jscodeshift](https://github.com/facebook/jscodeshift) to remove `React.FC` and `React.SFC` from your codebase
 
-## Motivation
+![gif animation showing how this codemod removes React.FC](https://github.com/gndelia/codemod-replace-react-fc-typescript/blob/main/example.gif?raw=true)
+
+(It's recommended to run your favorite formatting tool after the codemod :wink: )
+
+## :man_teacher: Motivation
 
 IF you use React and Typescript, you might have come across this [GitHub PR in Create React App's repo](https://github.com/facebook/create-react-app/pull/8177) about removing `React.FC` from their base template of a Typescript project.
 
@@ -106,7 +110,7 @@ const HelloWorld = function HelloWorld(props: Props) {
 }
 ```
 
-## How to use
+## :toolbox: How to use
 
 1- Install jscodeshift
 
@@ -128,7 +132,7 @@ There are other options you can read in the jscodeshift's Readme.
 jscodeshift -t Path/To/Repo/transform.ts --extensions=tsx --verbose=2 <FOLDER-YOU-WANT-TO-TRANSFORM>
 ```
 
-## Notes
+## :notebook: Notes
 
 - The codemod focuses in replacing the nodes but does not do styling. You might want to run Prettier or your favorite formatting tool after the code has been modified. For example, in the following code
 
@@ -177,5 +181,6 @@ const Component = ({ title, children }: Props) => <div title={title}>{children}<
 
 However, it won't compile because `children` is not part of your `Props` definition anymore. You can solve this by manually adding the type of `children` again.
 
-
 The value that `React.FC` provides (that accepts anything you would accept in js as children) is `{ children?: ReactNode }`. I'm intentionally not automatically adding it because  you can restrict it to what you only want to accept (for instance, just a string, a number, only one component, and so on), and you know better than I do what you need.
+
+Made with ❤ by Gonzalo
