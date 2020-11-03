@@ -283,6 +283,18 @@ const testCases: TestCase[] = [
     }
     `,
   },
+  {
+    input: `
+    import React from 'react'
+
+    const NoPropsComponent: React.FC<UnusedProps> = () => <span>foo</span>
+    `,
+    output: `
+    import React from 'react'
+
+    const NoPropsComponent = () => <span>foo</span>
+    `,
+  },
 ]
 
 function escapeLineEndingsAndMultiWhiteSpaces(text: string | null | undefined) {

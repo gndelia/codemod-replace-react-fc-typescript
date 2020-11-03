@@ -36,6 +36,10 @@ export default (fileInfo: FileInfo, { j }: API) => {
     const outerNewTypeAnnotation = extractPropsDefinitionFromReactFC(j, reactFcOrSfcNode)
     // build the new nodes
     const componentFunctionNode = n.node.init as ArrowFunctionExpression | FunctionExpression
+    // if no params, it could be that the component is not actually using props, so nothing to do here
+    if (componentFunctionNode.params.length === 0) {
+      return
+    }
     const firstParam = componentFunctionNode.params[0]
 
     let componentFunctionFirstParameter: Identifier | ObjectPattern | undefined
