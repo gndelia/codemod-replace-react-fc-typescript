@@ -187,6 +187,26 @@ const testCases: TestCase[] = [
     const MultipleProps = ( { id, ...restProps }: Props1 & { text?: string } ) => <span>foo</span>
     `,
   },
+  {
+    input: `
+    import React from 'react'
+
+    interface Props { id: number, text: string }
+    const Component: React.FC<Props> = (props) => (
+      <div>
+        <span>{props.id}</span>
+      </div>
+    )
+    `,
+    output: `
+    import React from 'react'
+
+    interface Props { id: number, text: string }
+    const Component = (props: Props) => <div>
+      <span>{props.id}</span>
+    </div>
+    `,
+  },
 ]
 
 function escapeLineEndingsAndMultiWhiteSpaces(text: string | null | undefined) {

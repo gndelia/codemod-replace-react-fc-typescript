@@ -110,5 +110,52 @@ jscodeshift -t Path/To/Repo/transform.ts --extensions=tsx --verbose=2 <FOLDER-YO
 
 ## Notes
 
-- The codemod focuses in replacing the nodes but does not do styling. You might want to run Prettier or your favorite formatting tool after the code has been modified.
-- If your component was using the implicit definition of `children` provided by `React.FC`, you will have to add the explicit definition or the code won't compile. The value that `React.FC` provides (that accepts anything you would accept in js as children) is `{ children?: ReactNode }`, but you can restrict it to what you only want to accept (for instance, just a string, a number, only one component, and so on)
+- The codemod focuses in replacing the nodes but does not do styling. You might want to run Prettier or your favorite formatting tool after the code has been modified. For example, in the following code
+
+```tsx
+import React from 'react'
+
+interface Props { id: number, text: string }
+const Component: React.FC<Props> = (props) => (
+  <div>
+    <span>{props.id}</span>
+  </div>
+)
+```
+
+after running the codemod, you might lose the parenthesis
+
+```tsx
+import React from 'react'
+
+interface Props { id: number, text: string }
+const Component = (props: Props) => <div>
+  <span>{props.id}</span>
+</div>
+```
+
+this is because those parenthesis are not strictly required for the code to work. You can fix this by running `Prettier` (or whatever tool you're using to format your code) easily, as the code is still valid
+
+
+
+- If your component was using the implicit definition of `children` provided by `React.FC`, you will have to add the explicit definition or the code won't compile. For example, the following code
+
+```tsx
+import React from 'react'
+
+type Props = { title: string }
+const Component: React.FC<Props> = ({ title, children }) => <div title={title}>{children}</div>
+```
+
+will be transformed into this after running the codemod
+```tsx
+import React from 'react'
+
+type Props = { title: string }
+const Component = ({ title, children }: Props) => <div title={title}>{children}</div>
+```
+
+However, it won't compile because `children` is not part of your `Props` definition anymore. You can solve this by manually adding the type of `children` again.
+
+
+The value that `React.FC` provides (that accepts anything you would accept in js as children) is `{ children?: ReactNode }`. I'm intentionally not automatically adding it because  you can restrict it to what you only want to accept (for instance, just a string, a number, only one component, and so on), and you know better than I do what you need.
