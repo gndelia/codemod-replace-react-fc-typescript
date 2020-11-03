@@ -86,6 +86,26 @@ const NoPropsComponent: React.FC = () => <span>foo</span>
 const NoPropsComponent = () => <span>foo</span>
 ```
 
+You don't have to stick with arrow functions only; all the previous scenarios work with regular named functions as well
+
+```tsx
+// before codemod runs
+import React from 'react'
+
+interface Props { text: string }
+const HelloWorld: React.SFC<Props> = function HelloWorld(props) {
+  return <div>Hi {props.someValue}</div>
+}
+
+// after codemod runs
+import React from 'react'
+
+interface Props { text: string }
+const HelloWorld = function HelloWorld(props: Props) {
+  return <div>Hi {props.someValue}</div>
+}
+```
+
 ## How to use
 
 1- Install jscodeshift

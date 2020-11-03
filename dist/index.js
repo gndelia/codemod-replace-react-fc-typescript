@@ -9,16 +9,13 @@ module.exports =
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.parser = void 0;
+exports.parser = 'tsx';
 const isIdentifier = (x) => x.type === 'Identifier';
 const isTsTypeReference = (x) => x.type === 'TSTypeReference';
 const isObjectPattern = (x) => x.type === 'ObjectPattern';
 const isTsIntersectionType = (x) => x.type === 'TSIntersectionType';
+const isArrowFunctionExpression = (x) => x.type === 'ArrowFunctionExpression';
 exports.default = (fileInfo, { j }) => {
-    // dynamically call the api method to build the proper node. For example TSPropertySignature becomes tsPropertySignature
-    function buildDynamicalNodeByType({ loc, ...rest }) {
-        const key = rest.type.slice(0, 2).toLowerCase() + rest.type.slice(2);
-        return j[key].from({ ...rest });
-    }
     function addPropsTypeToComponentBody(n) {
         // extract the Prop's type text
         const reactFcOrSfcNode = n.node.id.typeAnnotation.typeAnnotation;
@@ -26,36 +23,14 @@ exports.default = (fileInfo, { j }) => {
         if (!reactFcOrSfcNode.typeParameters) {
             return;
         }
-        const typeParameterFirstParam = reactFcOrSfcNode.typeParameters.params[0];
-        let newInnerTypeAnnotation;
-        // form of React.FC<Props> or React.SFC<Props>
-        if (isTsTypeReference(typeParameterFirstParam)) {
-            const { loc, ...rest } = typeParameterFirstParam;
-            newInnerTypeAnnotation = j.tsTypeReference.from({ ...rest });
-        }
-        else if (isTsIntersectionType(typeParameterFirstParam)) {
-            // form of React.FC<Props & Props2>
-            const { loc, ...rest } = typeParameterFirstParam;
-            newInnerTypeAnnotation = j.tsIntersectionType.from({
-                ...rest,
-                types: rest.types.map((t) => buildDynamicalNodeByType(t)),
-            });
-        }
-        else {
-            // form of React.FC<{ foo: number }> or React.SFC<{ foo: number }>
-            const inlineTypeDeclaration = typeParameterFirstParam;
-            // remove locations to avoid messing up with commans
-            const newMembers = inlineTypeDeclaration.members.map((m) => buildDynamicalNodeByType(m));
-            newInnerTypeAnnotation = j.tsTypeLiteral.from({ members: newMembers });
-        }
-        const outerNewTypeAnnotation = j.tsTypeAnnotation.from({ typeAnnotation: newInnerTypeAnnotation });
+        const outerNewTypeAnnotation = extractPropsDefinitionFromReactFC(j, reactFcOrSfcNode);
         // build the new nodes
-        const arrowFunctionNode = n.node.init;
-        const firstParam = arrowFunctionNode.params[0];
-        let arrowFunctionFirstParameter;
+        const componentFunctionNode = n.node.init;
+        const firstParam = componentFunctionNode.params[0];
+        let componentFunctionFirstParameter;
         // form of (props) =>
         if (isIdentifier(firstParam)) {
-            arrowFunctionFirstParameter = j.identifier.from({
+            componentFunctionFirstParameter = j.identifier.from({
                 ...firstParam,
                 typeAnnotation: outerNewTypeAnnotation,
             });
@@ -63,7 +38,7 @@ exports.default = (fileInfo, { j }) => {
         // form of ({ foo }) =>
         if (isObjectPattern(firstParam)) {
             const { properties, ...restParams } = firstParam;
-            arrowFunctionFirstParameter = j.objectPattern.from({
+            componentFunctionFirstParameter = j.objectPattern.from({
                 ...restParams,
                 // remove locations because properties might have a spread like ({ id, ...rest }) => and it breaks otherwise
                 properties: properties.map(({ loc, ...rest }) => {
@@ -79,13 +54,20 @@ exports.default = (fileInfo, { j }) => {
                 typeAnnotation: outerNewTypeAnnotation,
             });
         }
-        const newVariableDeclarator = j.variableDeclarator.from({
-            ...n.node,
-            init: j.arrowFunctionExpression.from({
-                ...arrowFunctionNode,
-                params: [arrowFunctionFirstParameter],
-            }),
-        });
+        let newInit;
+        if (isArrowFunctionExpression(componentFunctionNode)) {
+            newInit = j.arrowFunctionExpression.from({
+                ...componentFunctionNode,
+                params: [componentFunctionFirstParameter],
+            });
+        }
+        else {
+            newInit = j.functionExpression.from({
+                ...componentFunctionNode,
+                params: [componentFunctionFirstParameter],
+            });
+        }
+        const newVariableDeclarator = j.variableDeclarator.from({ ...n.node, init: newInit });
         n.replace(newVariableDeclarator);
         return;
     }
@@ -125,7 +107,37 @@ exports.default = (fileInfo, { j }) => {
         console.log(e);
     }
 };
-exports.parser = 'tsx';
+function extractPropsDefinitionFromReactFC(j, reactFcOrSfcNode) {
+    const typeParameterFirstParam = reactFcOrSfcNode.typeParameters.params[0];
+    let newInnerTypeAnnotation;
+    // form of React.FC<Props> or React.SFC<Props>
+    if (isTsTypeReference(typeParameterFirstParam)) {
+        const { loc, ...rest } = typeParameterFirstParam;
+        newInnerTypeAnnotation = j.tsTypeReference.from({ ...rest });
+    }
+    else if (isTsIntersectionType(typeParameterFirstParam)) {
+        // form of React.FC<Props & Props2>
+        const { loc, ...rest } = typeParameterFirstParam;
+        newInnerTypeAnnotation = j.tsIntersectionType.from({
+            ...rest,
+            types: rest.types.map((t) => buildDynamicalNodeByType(j, t)),
+        });
+    }
+    else {
+        // form of React.FC<{ foo: number }> or React.SFC<{ foo: number }>
+        const inlineTypeDeclaration = typeParameterFirstParam;
+        // remove locations to avoid messing up with commans
+        const newMembers = inlineTypeDeclaration.members.map((m) => buildDynamicalNodeByType(j, m));
+        newInnerTypeAnnotation = j.tsTypeLiteral.from({ members: newMembers });
+    }
+    const outerNewTypeAnnotation = j.tsTypeAnnotation.from({ typeAnnotation: newInnerTypeAnnotation });
+    return outerNewTypeAnnotation;
+}
+// dynamically call the api method to build the proper node. For example TSPropertySignature becomes tsPropertySignature
+function buildDynamicalNodeByType(j, { loc, ...rest }) {
+    const key = rest.type.slice(0, 2).toLowerCase() + rest.type.slice(2);
+    return j[key].from({ ...rest });
+}
 
 
 /***/ })

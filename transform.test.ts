@@ -207,6 +207,82 @@ const testCases: TestCase[] = [
     </div>
     `,
   },
+  {
+    input: `
+    import React from 'react'
+
+    interface Props { text: string }
+    const HelloWorld: React.FC<Props> = function HelloWorld({ someValue }) {
+      return <div>Hi {someValue}</div>
+    }
+    `,
+    output: `
+    import React from 'react'
+
+    interface Props { text: string }
+    const HelloWorld = function HelloWorld( { someValue }: Props ) {
+      return <div>Hi {someValue}</div>
+    }
+    `,
+  },
+  {
+    input: `
+    import React from 'react'
+
+    interface Props { text: string }
+    const HelloWorld: React.SFC<Props> = function HelloWorld({ someValue }) {
+      return <div>Hi {someValue}</div>
+    }
+    `,
+    output: `
+    import React from 'react'
+
+    interface Props { text: string }
+    const HelloWorld = function HelloWorld( { someValue }: Props ) {
+      return <div>Hi {someValue}</div>
+    }
+    `,
+  },
+  {
+    input: `
+    import React from 'react'
+
+    interface Props { text: string }
+    const HelloWorld: React.SFC<Props> = function HelloWorld(props) {
+      return <div>Hi {props.someValue}</div>
+    }
+    `,
+    output: `
+    import React from 'react'
+
+    interface Props { text: string }
+    const HelloWorld = function HelloWorld(props: Props) {
+      return <div>Hi {props.someValue}</div>
+    }
+    `,
+  },
+  {
+    input: `
+    import React from 'react'
+
+    type Props1 = { id: number }
+    const MultipleProps: React.FC<Props1 & { text?: string }> = function MultipleProps({ id, ...restProps }) {
+      return (
+        <span>foo</span>
+      )
+    }
+    `,
+    output: `
+    import React from 'react'
+
+    type Props1 = { id: number }
+    const MultipleProps = function MultipleProps( { id, ...restProps }: Props1 & { text?: string } ) {
+      return (
+        <span>foo</span>
+      )
+    }
+    `,
+  },
 ]
 
 function escapeLineEndingsAndMultiWhiteSpaces(text: string | null | undefined) {
