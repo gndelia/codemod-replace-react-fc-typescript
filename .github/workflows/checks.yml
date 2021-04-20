@@ -1,0 +1,53 @@
+name: Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  lint:
+    name: formatting and linting code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Install deps
+        run: npm ci
+      - name: Check Prettier
+        run: npm run style:check
+      - name: Check ESlint
+        run: npm run lint:check
+  test:
+    name: Checking test passes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Install deps
+        run: npm ci
+      - name: Run Tests
+        run: npm test
+        env:
+          CI: true
+  compile:
+    name: Check compilation is successful
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Install deps
+        run: npm ci
+      - name: Run compilation
+        run: npm run compile
