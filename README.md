@@ -110,6 +110,20 @@ const HelloWorld = function HelloWorld(props: Props) {
 }
 ```
 
+This codemod also works when using `FC` and `SFC` as a named export
+
+```tsx
+// before codemod runs
+import React, { FC } from 'react'
+
+const NamedExportComponent: FC<Props> = (props) => <span>foo</span>
+
+// after codemod runs
+import React, { FC } from 'react'
+
+const NamedExportComponent = (props: Props) => <span>foo</span>
+```
+
 ## :toolbox: How to use
 
 1- Install jscodeshift
