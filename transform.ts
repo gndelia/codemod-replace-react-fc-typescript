@@ -107,10 +107,13 @@ export default (fileInfo: FileInfo, { j }: API) => {
         const identifier = n?.id
         const typeName = identifier?.typeAnnotation?.typeAnnotation?.typeName
         const genericParamsType = identifier?.typeAnnotation?.typeAnnotation?.typeParameters?.type
-        // verify it is the shape of React.FC<Props> React.SFC<Props>, React.FC<{ type: string }>
+        // verify it is the shape of React.FC<Props> React.SFC<Props>, React.FC<{ type: string }>, FC<Props>, SFC<Props>, and so on
+
+        const isFC = (typeName?.left?.name === 'React' && typeName?.right?.name === 'FC') || typeName?.name === 'FC'
+        const isSFC = (typeName?.left?.name === 'React' && typeName?.right?.name === 'SFC') || typeName?.name === 'SFC'
+
         return (
-          typeName?.left?.name === 'React' &&
-          ['FC', 'SFC'].includes(typeName?.right?.name) &&
+          (isFC || isSFC) &&
           (['TSQualifiedName', 'TSTypeParameterInstantiation'].includes(genericParamsType) ||
             !identifier?.typeAnnotation?.typeAnnotation?.typeParameters)
         )

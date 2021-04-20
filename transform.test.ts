@@ -295,6 +295,92 @@ const testCases: TestCase[] = [
     const NoPropsComponent = () => <span>foo</span>
     `,
   },
+  {
+    input: `
+    import React, { FC } from 'react'
+
+    const NamedExportComponent: FC = () => <span>foo</span>
+    `,
+    output: `
+    import React, { FC } from 'react'
+
+    const NamedExportComponent = () => <span>foo</span>
+    `,
+  },
+  {
+    input: `
+    import React, { FC } from 'react'
+
+    const NamedExportComponent: FC<Props> = (props) => <span>foo</span>
+    `,
+    output: `
+    import React, { FC } from 'react'
+
+    const NamedExportComponent = (props: Props) => <span>foo</span>
+    `,
+  },
+  {
+    input: `
+    import React, { FC } from 'react'
+
+    const NamedExportComponent: FC<{ text?: string }> = ({ text = '' }) => <span>{text}</span>
+    `,
+    output: `
+    import React, { FC } from 'react'
+
+    const NamedExportComponent = ( { text = '' }: { text?: string } ) => <span>{text}</span>
+    `,
+  },
+  {
+    input: `
+    import React, { FC } from 'react'
+    interface Props {
+      text?: string
+    }
+    const NamedExportComponent: FC<Props> = ({ text = '' }) => <span>{text}</span>
+    `,
+    output: `
+    import React, { FC } from 'react'
+    interface Props {
+      text?: string
+    }
+    const NamedExportComponent = ( { text = '' }: Props ) => <span>{text}</span>
+    `,
+  },
+  {
+    input: `
+    import React, { SFC } from 'react'
+
+    const NamedExportComponent: SFC<Props> = (props) => <span>foo</span>
+    `,
+    output: `
+    import React, { SFC } from 'react'
+
+    const NamedExportComponent = (props: Props) => <span>foo</span>
+    `,
+  },
+  {
+    input: `
+    import React, { SFC } from 'react'
+
+    type Props1 = { id: number }
+    const MultipleProps: SFC<Props1 & { text?: string }> = function MultipleProps({ id, ...restProps }) {
+      return (
+        <span>foo</span>
+      )
+    }
+    `,
+    output: `
+    import React, { SFC } from 'react'
+
+    type Props1 = { id: number }
+    const MultipleProps = function MultipleProps( { id, ...restProps }: Props1 & { text?: string } ) {
+      return (
+        <span>foo</span>
+      )
+    }
+    `,
+  },
 ]
 
 function escapeLineEndingsAndMultiWhiteSpaces(text: string | null | undefined) {
