@@ -30,7 +30,9 @@
       "profile": "http://liby.github.io",
       "contributions": [
         "test",
-        "bug"
+        "bug",
+        "doc",
+        "code"
       ]
     }
   ],
