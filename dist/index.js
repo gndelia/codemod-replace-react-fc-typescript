@@ -15,6 +15,8 @@ const isTsTypeReference = (x) => x.type === 'TSTypeReference';
 const isObjectPattern = (x) => x.type === 'ObjectPattern';
 const isTsIntersectionType = (x) => x.type === 'TSIntersectionType';
 const isArrowFunctionExpression = (x) => x.type === 'ArrowFunctionExpression';
+// Using a function that accepts a component definition
+const isCallExpression = (x) => x?.type === 'CallExpression';
 exports.default = (fileInfo, { j }) => {
     function addPropsTypeToComponentBody(n) {
         // extract the Prop's type text
@@ -25,10 +27,16 @@ exports.default = (fileInfo, { j }) => {
         }
         const outerNewTypeAnnotation = extractPropsDefinitionFromReactFC(j, reactFcOrSfcNode);
         // build the new nodes
-        const componentFunctionNode = n.node.init;
-        // if no params, it could be that the component is not actually using props, so nothing to do here
-        if (componentFunctionNode.params.length === 0) {
+        const componentFunctionNode = (isCallExpression(n.node.init) ? n.node.init.arguments[0] : n.node.init);
+        const paramsLength = componentFunctionNode?.params?.length;
+        // The remaining parameters except the first parameter
+        let restParameters = [];
+        if (!paramsLength) {
+            // if no params, it could be that the component is not actually using props, so nothing to do here
             return;
+        }
+        else {
+            restParameters = componentFunctionNode.params.slice(1, paramsLength);
         }
         const firstParam = componentFunctionNode.params[0];
         let componentFunctionFirstParameter;
@@ -62,16 +70,28 @@ exports.default = (fileInfo, { j }) => {
         if (isArrowFunctionExpression(componentFunctionNode)) {
             newInit = j.arrowFunctionExpression.from({
                 ...componentFunctionNode,
-                params: [componentFunctionFirstParameter],
+                params: [componentFunctionFirstParameter, ...restParameters],
             });
         }
         else {
             newInit = j.functionExpression.from({
                 ...componentFunctionNode,
-                params: [componentFunctionFirstParameter],
+                params: [componentFunctionFirstParameter, ...restParameters],
             });
         }
-        const newVariableDeclarator = j.variableDeclarator.from({ ...n.node, init: newInit });
+        let newVariableDeclarator;
+        if (isCallExpression(n.node.init)) {
+            newVariableDeclarator = j.variableDeclarator.from({
+                ...n.node,
+                init: {
+                    ...n.node.init,
+                    arguments: [newInit],
+                },
+            });
+        }
+        else {
+            newVariableDeclarator = j.variableDeclarator.from({ ...n.node, init: newInit });
+        }
         n.replace(newVariableDeclarator);
         return;
     }
@@ -94,7 +114,9 @@ exports.default = (fileInfo, { j }) => {
             const typeName = identifier?.typeAnnotation?.typeAnnotation?.typeName;
             const genericParamsType = identifier?.typeAnnotation?.typeAnnotation?.typeParameters?.type;
             // verify it is the shape of React.FC<Props> React.SFC<Props>, React.FC<{ type: string }>, FC<Props>, SFC<Props>, and so on
-            const isFC = (typeName?.left?.name === 'React' && typeName?.right?.name === 'FC') || typeName?.name === 'FC';
+            const isEqualFcOrFunctionComponent = (name) => ['FC', 'FunctionComponent'].includes(name);
+            const isFC = (typeName?.left?.name === 'React' && isEqualFcOrFunctionComponent(typeName?.right?.name)) ||
+                isEqualFcOrFunctionComponent(typeName?.name);
             const isSFC = (typeName?.left?.name === 'React' && typeName?.right?.name === 'SFC') || typeName?.name === 'SFC';
             return ((isFC || isSFC) &&
                 (['TSQualifiedName', 'TSTypeParameterInstantiation'].includes(genericParamsType) ||
