@@ -52,6 +52,56 @@ const testCases: TestCase[] = [
   },
   {
     input: `
+      import React from 'react';
+
+      const MyComponent: React.FunctionComponent = () => {
+        return <span>foo</span>
+      }`,
+    output: `
+      import React from 'react';
+
+      const MyComponent = () => {
+        return <span>foo</span>
+      }`,
+  },
+  {
+    input: `
+      import React from 'react';
+
+      type Props = { id: number };
+      const MyComponent: React.FunctionComponent<Props> = (props) => {
+        return <span>{props.id}</span>
+      }`,
+    output: `
+      import React from 'react';
+
+      type Props = { id: number };
+      const MyComponent = (props: Props) => {
+        return <span>{props.id}</span>
+      }`,
+  },
+  {
+    input: `
+      import React from 'react';
+
+      type Props2 = { id: number };
+      const MyComponent: React.FunctionComponent<Props2> = ({ id }) => {
+        return <span>{id}</span>
+      }`,
+    output: `
+      import React from 'react';
+
+      type Props2 = { id: number };
+      const MyComponent = (
+        {
+          id
+        }: Props2
+      ) => {
+        return <span>{id}</span>
+      }`,
+  },
+  {
+    input: `
     import React from 'react'
 
     type MyAwesomeProps = { text: string };
@@ -380,6 +430,313 @@ const testCases: TestCase[] = [
       )
     }
     `,
+  },
+  {
+    input: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      const MyComponent: React.FC = observer(() => {
+        return <span>foo</span>
+      })`,
+    output: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      const MyComponent = observer(() => {
+        return <span>foo</span>
+      })`,
+  },
+  {
+    input: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      type Props = { id: number };
+      const MyComponent: React.FC<Props> = observer((props) => {
+        return <span>{props.id}</span>
+      })`,
+    output: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      type Props = { id: number };
+      const MyComponent = observer((props: Props) => {
+        return <span>{props.id}</span>
+      })`,
+  },
+  {
+    input: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      type Props2 = { id: number };
+      const MyComponent: React.FC<Props2> = observer(({ id }) => {
+        return <span>{id}</span>
+      })`,
+    output: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      type Props2 = { id: number };
+      const MyComponent = observer((
+        {
+          id
+        }: Props2
+      ) => {
+        return <span>{id}</span>
+      })`,
+  },
+  {
+    input: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      const MyComponent: React.FunctionComponent = observer(() => {
+        return <span>foo</span>
+      })`,
+    output: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      const MyComponent = observer(() => {
+        return <span>foo</span>
+      })`,
+  },
+  {
+    input: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      type Props = { id: number };
+      const MyComponent: React.FunctionComponent<Props> = observer((props) => {
+        return <span>{props.id}</span>
+      })`,
+    output: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      type Props = { id: number };
+      const MyComponent = observer((props: Props) => {
+        return <span>{props.id}</span>
+      })`,
+  },
+  {
+    input: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      type Props2 = { id: number };
+      const MyComponent: React.FunctionComponent<Props2> = observer(({ id }) => {
+        return <span>{id}</span>
+      })`,
+    output: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      type Props2 = { id: number };
+      const MyComponent = observer((
+        {
+          id
+        }: Props2
+      ) => {
+        return <span>{id}</span>
+      })`,
+  },
+  {
+    input: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      const MyComponent: React.SFC = observer(() => {
+        return <span>foo</span>
+      })`,
+    output: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      const MyComponent = observer(() => {
+        return <span>foo</span>
+      })`,
+  },
+  {
+    input: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      type Props = { id: number };
+      const MyComponent: React.SFC<Props> = observer((props) => {
+        return <span>{props.id}</span>
+      })`,
+    output: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      type Props = { id: number };
+      const MyComponent = observer((props: Props) => {
+        return <span>{props.id}</span>
+      })`,
+  },
+  {
+    input: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      type Props2 = { id: number };
+      const MyComponent: React.SFC<Props2> = observer(({ id }) => {
+        return <span>{id}</span>
+      })`,
+    output: `
+      import React from 'react';
+      import { observer } from "mobx-react-lite";
+
+      type Props2 = { id: number };
+      const MyComponent = observer((
+        {
+          id
+        }: Props2
+      ) => {
+        return <span>{id}</span>
+      })`,
+  },
+  {
+    input: `
+      import { FC, forwardRef } from 'react';
+
+      const MyComponent: FC = forwardRef((ref) => {
+        return <span>foo</span>
+      })`,
+    output: `
+      import { FC, forwardRef } from 'react';
+
+      const MyComponent = forwardRef((ref) => {
+        return <span>foo</span>
+      })`,
+  },
+  {
+    input: `
+      import { FC, forwardRef } from 'react';
+
+      type Props = { id: number };
+      const MyComponent: FC<Props> = forwardRef((props, ref) => {
+        return <span>{props.id}</span>
+      })`,
+    output: `
+      import { FC, forwardRef } from 'react';
+
+      type Props = { id: number };
+      const MyComponent = forwardRef((props: Props, ref) => {
+        return <span>{props.id}</span>
+      })`,
+  },
+  {
+    input: `
+      import { FC, forwardRef } from 'react';
+
+      type Props2 = { id: number };
+      const MyComponent: FC<Props2> = forwardRef(({ id }, ref) => {
+        return <span>{id}</span>
+      })`,
+    output: `
+      import { FC, forwardRef } from 'react';
+
+      type Props2 = { id: number };
+      const MyComponent = forwardRef((
+        {
+          id
+        }: Props2,
+        ref
+      ) => {
+        return <span>{id}</span>
+      })`,
+  },
+  {
+    input: `
+      import { FC, forwardRef } from 'react';
+
+      const MyComponent: FC = forwardRef((ref) => {
+        return <span>foo</span>
+      })`,
+    output: `
+      import { FC, forwardRef } from 'react';
+
+      const MyComponent = forwardRef((ref) => {
+        return <span>foo</span>
+      })`,
+  },
+  {
+    input: `
+      import { FunctionComponent, forwardRef } from 'react';
+
+      type Props = { id: number };
+      const MyComponent: FunctionComponent<Props> = forwardRef((props, ref) => {
+        return <span>{props.id}</span>
+      })`,
+    output: `
+      import { FunctionComponent, forwardRef } from 'react';
+
+      type Props = { id: number };
+      const MyComponent = forwardRef((props: Props, ref) => {
+        return <span>{props.id}</span>
+      })`,
+  },
+  {
+    input: `
+      import { FunctionComponent, forwardRef } from 'react';
+
+      type Props2 = { id: number };
+      const MyComponent: FunctionComponent<Props2> = forwardRef(({ id }, ref) => {
+        return <span>{id}</span>
+      })`,
+    output: `
+      import { FunctionComponent, forwardRef } from 'react';
+
+      type Props2 = { id: number };
+      const MyComponent = forwardRef((
+        {
+          id
+        }: Props2,
+        ref
+      ) => {
+        return <span>{id}</span>
+      })`,
+  },
+  {
+    input: `
+      import { SFC, forwardRef } from 'react';
+
+      type Props = { id: number };
+      const MyComponent: SFC<Props> = forwardRef((props, ref) => {
+        return <span>{props.id}</span>
+      })`,
+    output: `
+      import { SFC, forwardRef } from 'react';
+
+      type Props = { id: number };
+      const MyComponent = forwardRef((props: Props, ref) => {
+        return <span>{props.id}</span>
+      })`,
+  },
+  {
+    input: `
+      import { SFC, forwardRef } from 'react';
+
+      type Props2 = { id: number };
+      const MyComponent: SFC<Props2> = forwardRef(({ id }, ref) => {
+        return <span>{id}</span>
+      })`,
+    output: `
+      import { SFC, forwardRef } from 'react';
+
+      type Props2 = { id: number };
+      const MyComponent = forwardRef((
+        {
+          id
+        }: Props2,
+        ref
+      ) => {
+        return <span>{id}</span>
+      })`,
   },
 ]
 

@@ -18,7 +18,7 @@ The three main points that made me buy this was the fact that:
 
 as well as other downsides (check out the PR description for that)
 
-Motivated by that PR, and a lot of blog posts who also shared similar conclusions (and this [ADR](https://backstage.io/docs/architecture-decisions/adrs-adr006) from Spotify's team in which they recorded the decision of removing `React.FC` from they codebase too), I wrote this little codemod that drops `React.FC` and `React.SFC` (which was also deprecated) and replaces the Props as the type of the unique argument in the component definition.
+Motivated by that PR, and a lot of blog posts who also shared similar conclusions (and this [ADR](https://backstage.io/docs/architecture-decisions/adrs-adr006) from Spotify's team in which they recorded the decision of removing `React.FC` from they codebase too), I wrote this little codemod that drops `React.FC`, `React.FunctionComponent` and `React.SFC` (which was also deprecated) and replaces the Props as the type of the unique argument in the component definition.
 
 Let's see it with code
 
@@ -110,7 +110,29 @@ const HelloWorld = function HelloWorld(props: Props) {
 }
 ```
 
-This codemod also works when using `FC` and `SFC` as a named export
+It also works when you use a function that accepts a component definition
+
+```ts
+// before codemod runs
+import React from 'react';
+import { observer } from "mobx-react-lite";
+
+type Props = { id: number };
+const functionAcceptsComponent: React.FC<Props> = observer((props) => {
+  return <span>{props.id}</span>
+})
+
+// after codemod runs
+import React from 'react';
+import { observer } from "mobx-react-lite";
+
+type Props = { id: number };
+export const functionAcceptsComponent = observer((props: Props) => {
+  return <span>{props.id}</span>
+})
+```
+
+This codemod also works when using `FC`, `FunctionComponent` and `SFC` as a named export
 
 ```tsx
 // before codemod runs
@@ -140,7 +162,7 @@ jscodeshift -t https://raw.githubusercontent.com/gndelia/codemod-replace-react-f
 
 There are other options you can read in the jscodeshift's Readme.
 
-`jscodeshift` only accepts local transform files, or remote self-contained files. That's why I compiled the transform file into one distributable file using [@vercel/ncc](https://github.com/vercel/ncc). If you don't want to run this remote file (because you might not trust, although you can read the source - it is totally safe), you can download this repo and run 
+`jscodeshift` only accepts local transform files, or remote self-contained files. That's why I compiled the transform file into one distributable file using [@vercel/ncc](https://github.com/vercel/ncc). If you don't want to run this remote file (because you might not trust, although you can read the source - it is totally safe), you can download this repo and run
 
 ```
 jscodeshift -t Path/To/Repo/transform.ts --extensions=tsx --verbose=2 <FOLDER-YOU-WANT-TO-TRANSFORM>
