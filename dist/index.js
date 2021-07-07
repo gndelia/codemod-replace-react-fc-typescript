@@ -17,12 +17,21 @@ const isTsIntersectionType = (x) => x.type === 'TSIntersectionType';
 const isArrowFunctionExpression = (x) => x.type === 'ArrowFunctionExpression';
 // Using a function that accepts a component definition
 const isCallExpression = (x) => x?.type === 'CallExpression';
+const isTSIntersectionType = (x) => x?.type === 'TSIntersectionType';
 exports.default = (fileInfo, { j }) => {
     function addPropsTypeToComponentBody(n) {
         // extract the Prop's type text
-        const reactFcOrSfcNode = n.node.id.typeAnnotation.typeAnnotation;
+        let reactFcOrSfcNode;
+        if (isIdentifier(n.node.id)) {
+            if (isTSIntersectionType(n.node.id.typeAnnotation.typeAnnotation)) {
+                reactFcOrSfcNode = n.node.id.typeAnnotation.typeAnnotation.types[0];
+            }
+            else {
+                reactFcOrSfcNode = n.node.id.typeAnnotation.typeAnnotation;
+            }
+        }
         // shape of React.FC (no props)
-        if (!reactFcOrSfcNode.typeParameters) {
+        if (!reactFcOrSfcNode?.typeParameters) {
             return;
         }
         const outerNewTypeAnnotation = extractPropsDefinitionFromReactFC(j, reactFcOrSfcNode);
@@ -111,7 +120,13 @@ exports.default = (fileInfo, { j }) => {
         const newSource = root
             .find(j.VariableDeclarator, (n) => {
             const identifier = n?.id;
-            const typeName = identifier?.typeAnnotation?.typeAnnotation?.typeName;
+            let typeName;
+            if (isTSIntersectionType(identifier?.typeAnnotation?.typeAnnotation)) {
+                typeName = identifier.typeAnnotation.typeAnnotation.types[0].typeName;
+            }
+            else {
+                typeName = identifier?.typeAnnotation?.typeAnnotation?.typeName;
+            }
             const genericParamsType = identifier?.typeAnnotation?.typeAnnotation?.typeParameters?.type;
             // verify it is the shape of React.FC<Props> React.SFC<Props>, React.FC<{ type: string }>, FC<Props>, SFC<Props>, and so on
             const isEqualFcOrFunctionComponent = (name) => ['FC', 'FunctionComponent'].includes(name);

@@ -26,13 +26,22 @@ const isArrowFunctionExpression = (x: any): x is ArrowFunctionExpression =>
   (x as ArrowFunctionExpression).type === 'ArrowFunctionExpression'
 // Using a function that accepts a component definition
 const isCallExpression = (x: any): x is CallExpression => x?.type === 'CallExpression'
+const isTSIntersectionType = (x: any): x is TSIntersectionType => x?.type === 'TSIntersectionType'
 
 export default (fileInfo: FileInfo, { j }: API) => {
   function addPropsTypeToComponentBody(n: ASTPath<VariableDeclarator>) {
     // extract the Prop's type text
-    const reactFcOrSfcNode = (n.node.id as Identifier).typeAnnotation!.typeAnnotation as TSTypeReference
+    let reactFcOrSfcNode
+    if (isIdentifier(n.node.id)) {
+      if (isTSIntersectionType(n.node.id.typeAnnotation!.typeAnnotation)) {
+        reactFcOrSfcNode = n.node.id.typeAnnotation!.typeAnnotation.types[0] as TSTypeReference
+      } else {
+        reactFcOrSfcNode = n.node.id.typeAnnotation!.typeAnnotation as TSTypeReference
+      }
+    }
+
     // shape of React.FC (no props)
-    if (!reactFcOrSfcNode.typeParameters) {
+    if (!reactFcOrSfcNode?.typeParameters) {
       return
     }
 
@@ -129,7 +138,13 @@ export default (fileInfo: FileInfo, { j }: API) => {
     const newSource = root
       .find(j.VariableDeclarator, (n: any) => {
         const identifier = n?.id
-        const typeName = identifier?.typeAnnotation?.typeAnnotation?.typeName
+        let typeName
+        if (isTSIntersectionType(identifier?.typeAnnotation?.typeAnnotation)) {
+          typeName = identifier.typeAnnotation.typeAnnotation.types[0].typeName
+        } else {
+          typeName = identifier?.typeAnnotation?.typeAnnotation?.typeName
+        }
+
         const genericParamsType = identifier?.typeAnnotation?.typeAnnotation?.typeParameters?.type
         // verify it is the shape of React.FC<Props> React.SFC<Props>, React.FC<{ type: string }>, FC<Props>, SFC<Props>, and so on
 

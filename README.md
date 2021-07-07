@@ -80,6 +80,32 @@ const WithIntersection: React.FC<Props1 & Props2> = ({ id, ...restProps }) => <s
 const WithIntersection = ( { id, ...restProps }: Props1 & Props2 ) => <span>{id}</span>
 ```
 
+and with component modules defined using intersection
+
+```tsx
+// before codemod runs
+import React from 'react';
+import { OtherComponent } from "./other-component";
+
+interface Props { text: string }
+const WithComponentIntersection: React.FC<Props> & {
+  OtherComponent: typeof OtherComponent;
+} = (props) => {
+  return <span>{props.text}</span>
+}
+WithComponentIntersection.OtherComponent = OtherComponent;
+
+// after codemod runs
+import React from 'react';
+import { OtherComponent } from "./other-component";
+
+interface Props { text: string }
+const WithComponentIntersection = (props: Props) => {
+  return <span>{props.text}</span>
+}
+WithComponentIntersection.OtherComponent = OtherComponent;
+```
+
 Even with no Props!
 
 ```tsx
