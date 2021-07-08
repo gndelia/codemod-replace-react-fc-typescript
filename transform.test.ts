@@ -738,6 +738,127 @@ const testCases: TestCase[] = [
         return <span>{id}</span>
       })`,
   },
+  {
+    input: `
+      import React from 'react'
+      import { OtherComponent } from "./other-component";
+
+      export const MyComponent: {
+        (): JSX.Element;
+        OtherComponent: typeof OtherComponent;
+      } = () => <span>foo</span>;
+      MyComponent.OtherComponent = OtherComponent;
+    `,
+    output: null,
+  },
+  {
+    input: `
+      import React from 'react'
+      import { OtherComponent } from "./other-component";
+      interface Props {
+        text: string;
+      }
+      export const MyComponent: React.FC<Props> & {
+        OtherComponent: typeof OtherComponent;
+      } = (props) => <span>{props.text}</span>;
+      MyComponent.OtherComponent = OtherComponent;
+    `,
+    output: `
+      import React from 'react'
+      import { OtherComponent } from "./other-component";
+      interface Props {
+        text: string;
+      }
+      export const MyComponent = (props: Props) => <span>{props.text}</span>;
+      MyComponent.OtherComponent = OtherComponent;
+    `,
+  },
+  {
+    input: `
+      import React from 'react'
+      import { OtherComponent } from "./other-component";
+
+      type Props = { id: number };
+      export const MyComponent: React.FC<Props> & {
+        OtherComponent: typeof OtherComponent;
+      } = ({ text }) => <span>{text}</span>;
+      MyComponent.OtherComponent = OtherComponent;
+    `,
+    output: `
+      import React from 'react'
+      import { OtherComponent } from "./other-component";
+
+      type Props = { id: number };
+      export const MyComponent = ( { text }: Props ) => <span>{text}</span>;
+      MyComponent.OtherComponent = OtherComponent;
+    `,
+  },
+  {
+    input: `
+      import React from 'react'
+      import { OtherComponent } from "./other-component";
+
+      type Props = { id: number };
+      export const MyComponent: React.FunctionComponent<Props> & {
+        OtherComponent: typeof OtherComponent;
+      } = (props) => <span>{props.text}</span>;
+      MyComponent.OtherComponent = OtherComponent;
+    `,
+    output: `
+      import React from 'react'
+      import { OtherComponent } from "./other-component";
+
+      type Props = { id: number };
+      export const MyComponent = (props: Props) => <span>{props.text}</span>;
+      MyComponent.OtherComponent = OtherComponent;
+    `,
+  },
+  {
+    input: `
+      import React from 'react'
+      import { OtherComponent } from "./other-component";
+
+      type Props = { id: number };
+      export const MyComponent: React.SFC<Props> & {
+        OtherComponent: typeof OtherComponent;
+      } = ({ text }) => <span>{text}</span>;
+      MyComponent.OtherComponent = OtherComponent;
+    `,
+    output: `
+      import React from 'react'
+      import { OtherComponent } from "./other-component";
+
+      type Props = { id: number };
+      export const MyComponent = ( { text }: Props ) => <span>{text}</span>;
+      MyComponent.OtherComponent = OtherComponent;
+    `,
+  },
+  {
+    input: `
+      import React from 'react';
+      import { OtherComponent } from "./other-component";
+      import { observer } from "mobx-react-lite";
+
+      type Props = { id: number };
+      const MyComponent: React.FC<Props> & {
+        OtherComponent: typeof OtherComponent;
+      } = observer((props) => {
+        return <span>{props.id}</span>
+      })
+      MyComponent.OtherComponent = OtherComponent;
+    `,
+    output: `
+      import React from 'react';
+      import { OtherComponent } from "./other-component";
+      import { observer } from "mobx-react-lite";
+
+      type Props = { id: number };
+      const MyComponent = observer((props: Props) => {
+        return <span>{props.id}</span>
+      })
+      MyComponent.OtherComponent = OtherComponent;
+    `,
+  },
 ]
 
 function escapeLineEndingsAndMultiWhiteSpaces(text: string | null | undefined) {
