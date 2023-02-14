@@ -174,16 +174,10 @@ const NamedExportComponent = (props: Props) => <span>foo</span>
 
 ## :toolbox: How to use
 
-1- Install jscodeshift
+Run the following command
 
 ```
-npm install -g jscodeshift
-```
-
-2- Run the following command
-
-```
-jscodeshift -t https://raw.githubusercontent.com/gndelia/codemod-replace-react-fc-typescript/main/dist/index.js --extensions=tsx --verbose=2 <FOLDER-YOU-WANT-TO-TRANSFORM>
+npx jscodeshift -- -t https://raw.githubusercontent.com/gndelia/codemod-replace-react-fc-typescript/main/dist/index.js --extensions=tsx --verbose=2 <FOLDER-YOU-WANT-TO-TRANSFORM>
 ```
 
 There are other options you can read in the jscodeshift's Readme.
@@ -191,7 +185,7 @@ There are other options you can read in the jscodeshift's Readme.
 `jscodeshift` only accepts local transform files, or remote self-contained files. That's why I compiled the transform file into one distributable file using [@vercel/ncc](https://github.com/vercel/ncc). If you don't want to run this remote file (because you might not trust, although you can read the source - it is totally safe), you can download this repo and run
 
 ```
-jscodeshift -t Path/To/Repo/transform.ts --extensions=tsx --verbose=2 <FOLDER-YOU-WANT-TO-TRANSFORM>
+npx jscodeshift -- -t Path/To/Repo/transform.ts --extensions=tsx --verbose=2 <FOLDER-YOU-WANT-TO-TRANSFORM>
 ```
 
 ## :notebook: Notes
