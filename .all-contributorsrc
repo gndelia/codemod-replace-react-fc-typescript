@@ -34,6 +34,15 @@
         "doc",
         "code"
       ]
+    },
+    {
+      "login": "JLarky",
+      "name": "Yaroslav Lapin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7026?v=4",
+      "profile": "https://jlarky.now.sh/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
