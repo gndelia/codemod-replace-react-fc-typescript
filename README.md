@@ -180,9 +180,14 @@ const NamedExportComponent = (props: Props) => <span>foo</span>
 
 ![gif animation showing how to use Intuita to run this codemod](/intuita-example.gif?raw=true)
 
-To run the codemod with the Intuita VS Code extension, [install Intuita VS Code extension](https://marketplace.visualstudio.com/items?itemName=Intuita.intuita-vscode-extension) and run the codemod:
+<div align="center">
 
-<div><a href="https://tinyurl.com/replace-react-fc-typescript" target="_blank"><img src="https://raw.githubusercontent.com/intuita-inc/intuita-docs/master/static/img/misc/1-click-run-codemod-with-intuita-badge.png" alt="Intuita Run Codemod" height="40px"/></a></div>
+  To run the codemod with the Intuita VS Code extension, [install Intuita VS Code extension](https://marketplace.visualstudio.com/items?itemName=Intuita.intuita-vscode-extension) and run the codemod:</p>
+  
+<div><a href="https://tinyurl.com/replace-react-fc-typescript" target="_blank"><img src="https://raw.githubusercontent.com/intuita-inc/intuita-docs/master/static/img/misc/1-click-run-codemod-with-intuita-badge.png" alt="Intuita Run Codemod" height="45px"/></a></div>
+</div>
+
+> 💡 To learn more about running codemods using Intuita, check the usage guide [here](https://docs.intuita.io/docs/vs-code-extension/advanced-usage).
 
 ### Using `jscodeshift`
 
