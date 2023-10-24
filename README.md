@@ -187,15 +187,15 @@ To run the codemod on your project with the Intuita VS Code extension:
 
 <div style="display: flex; align-items: center;">
 
-<div style="margin-right:15px;">
+<div style="margin-right:10px">
 
-3.  Use the 1-click run feature: 
+3. Run the codemod:
 
 </div>
 
-<div>
+<div ">
 <a href="http://tinyurl.com/intuita-ratchet" target="_blank">
-<img src="https://raw.githubusercontent.com/intuita-inc/intuita-docs/master/static/img/intuita-badge.png" alt="Intuita Run Codemod" width="180"/>
+<img src="https://raw.githubusercontent.com/intuita-inc/intuita-docs/master/static/img/misc/1-click-run-codemod-with-intuita-badge.png" alt="Intuita Run Codemod" height="30px"/>
 </a>
 </div>
 
