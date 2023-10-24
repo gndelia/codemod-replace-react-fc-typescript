@@ -6,6 +6,8 @@ A codemod using [jscodeshift](https://github.com/facebook/jscodeshift) to remove
 
 (It's recommended to run your favorite formatting tool after the codemod :wink: )
 
+> 💡 Running the codemod [with Intuita](#using-intuita) will automatically format your code with prettier.
+
 ## :man_teacher: Motivation
 
 IF you use React and Typescript, you might have come across this [GitHub PR in Create React App's repo](https://github.com/facebook/create-react-app/pull/8177) about removing `React.FC` from their base template of a Typescript project.
@@ -174,6 +176,21 @@ const NamedExportComponent = (props: Props) => <span>foo</span>
 
 ## :toolbox: How to use
 
+### Using Intuita
+
+![gif animation showing how to use Intuita to run this codemod](/intuita-example.gif?raw=true)
+
+<div align="center">
+
+  To run the codemod with the Intuita VS Code extension, [install Intuita VS Code extension](https://marketplace.visualstudio.com/items?itemName=Intuita.intuita-vscode-extension) and run the codemod:</p>
+  
+<div><a href="https://tinyurl.com/replace-react-fc-typescript" target="_blank"><img src="https://raw.githubusercontent.com/intuita-inc/intuita-docs/master/static/img/misc/1-click-run-codemod-with-intuita-badge.png" alt="Intuita Run Codemod" height="45px"/></a></div>
+</div>
+
+> 💡 To learn more about running codemods using Intuita, check the usage guide [here](https://docs.intuita.io/docs/vs-code-extension/advanced-usage).
+
+### Using `jscodeshift`
+
 Run the following command
 
 ```
@@ -190,7 +207,9 @@ npx jscodeshift -- -t Path/To/Repo/transform.ts --extensions=tsx --verbose=2 <FO
 
 ## :notebook: Notes
 
-- The codemod focuses in replacing the nodes but does not do styling. You might want to run Prettier or your favorite formatting tool after the code has been modified. For example, in the following code
+- The codemod focuses on replacing the nodes but does not do styling. If you run the codemod using `jscodeshift` CLI, you might want to run Prettier or your favorite formatting tool after the code has been modified. However, if you run the codemod using intuita, you can safely skip this part as Intuita automatically formats the output with prettier.
+
+### Example:
 
 ```tsx
 import React from 'react'
