@@ -43,8 +43,18 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "mohab-sameh",
+      "name": "Mohab Sameh",
+      "avatar_url": "https://avatars.githubusercontent.com/u/37941642?v=4",
+      "profile": "https://github.com/mohab-sameh",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
-  "skipCi": true
+  "skipCi": true,
+  "commitType": "docs"
 }
